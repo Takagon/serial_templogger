@@ -2,9 +2,10 @@ import serial
 import time
 import datetime
 import os
+import math
 
 old_temp = 24.0
-low_pass_gain = 0
+low_pass_gain = 0.1
 
 def low_pass_filter(old_val,val,k):
     return (old_val * k) + (val * (1 - k))
@@ -30,7 +31,6 @@ templog_file = open(FileName_withdate,'w')
 arduino_serial = serial.Serial('/dev/ttyACM0',baudrate=9600,timeout=0.1)
 
 while True:
-    templog_file = open(FileName_withdate,'w')
     temp = arduino_serial.readline()
     utf_temp = temp.decode('utf-8')
     if utf_temp == '999':
@@ -39,8 +39,8 @@ while True:
         utf_temp = temp.decode('utf-8')
         if is_num(utf_temp) == True:
             temp_f = low_pass_filter(float(old_temp),float(utf_temp),low_pass_gain)
-            print(TIME_STR + ',' + str(temp_f))
-            templog_file.write(str(temp_f) + '\n')
+            print(TIME_STR + ',' + str(round(temp_f,4)))
+            templog_file.write(str(round(temp_f,4)) + '\n')
             old_temp = temp_f
 
 
